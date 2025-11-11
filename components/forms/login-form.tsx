@@ -16,6 +16,10 @@ import {
 } from "@/components/ui/field"
 import {Loader2} from "lucide-react"
 import { useState } from "react"
+import {toast } from "sonner"
+import { useRouter } from "next/navigation"
+
+import { signInUser } from "@/server/users"
 
 
 import { zodResolver } from "@hookform/resolvers/zod"
@@ -48,7 +52,7 @@ export function LoginForm({
   className,
   ...props
 }: React.ComponentProps<"div">) {
-
+  const router = useRouter()
   const[isLoading, setIsLoading] = useState(false)
 
   //Define form
@@ -65,8 +69,24 @@ export function LoginForm({
   }
 
   //submit handler
-  function onSubmit(values: z.infer<typeof formSchema>) {
+  async function onSubmit(values: z.infer<typeof formSchema>) {
+    try{
+      setIsLoading(true)
 
+      const response = await signInUser(values.email, values.password)
+
+      if(response.success){
+        toast.success(response.message)
+        router.push("/dasboard")
+      }else{
+        toast.error(response.message)
+      }
+
+    }catch(error){
+      console.error(error)
+    }finally {
+      setIsLoading(false)
+    }
   }
 
   return (
