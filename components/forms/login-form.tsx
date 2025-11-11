@@ -72,7 +72,7 @@ export function LoginForm({
   async function onSubmit(values: z.infer<typeof formSchema>) {
     try{
       setIsLoading(true)
-
+      //send data to server
       const response = await signInUser(values.email, values.password)
 
       if(response.success){
@@ -112,7 +112,7 @@ export function LoginForm({
                     <FormItem>
                       <FormLabel>Email</FormLabel>
                       <FormControl>
-                        <Input placeholder="Your Email" {...field}/>
+                        <Input type="email" placeholder="Your Email" {...field}/>
                       </FormControl>
                       <FormMessage />
                     </FormItem>
