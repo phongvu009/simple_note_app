@@ -72,7 +72,7 @@ export function LoginForm({
 
       if(response.success){
         toast.success(response.message)
-        router.push("/dasboard")
+        router.push("/dashboard")
       }else{
         toast.error(response.message)
       }
