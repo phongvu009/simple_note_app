@@ -5,6 +5,7 @@ import { schema } from "@/db/schema"
 import { nextCookies } from "better-auth/next-js";
 
 import {Resend} from "resend"
+import VerificationEmail from "@/components/emails/verification-email";
 
 const resend = new Resend(process.env.RESEND_API_KEY)
 
@@ -21,11 +22,13 @@ export const auth = betterAuth({
     plugins: [nextCookies()],
     emailVerification: {
         sendVerificationEmail: async({user,url,token}, request) => {
-            await sendEmail({
-                to: user.email,
+            const {data,error} = await resend.emails.send({
+                from:'onboarding@resend.dev',
+                to: [user.email],
                 subject: "Verify your email address",
-                text: `Click the link to verify your email: ${url}`
+                react: VerificationEmail({userName: user.name, verificationUrl: url})
             })
-        }
+        },
+        sendOnSignUp: true,
     }
 });
