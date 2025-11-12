@@ -16,10 +16,12 @@ import {useForm} from "react-hook-form"
 import type {Control, FieldPath} from "react-hook-form"
 import {zodResolver} from "@hookform/resolvers/zod"
 import { signUpUser } from "@/server/users"
+import { authClient } from "@/lib/auth-client"
+
+import { useRouter, useSearchParams } from "next/navigation"
+
 //form schema
 const formSchema = z.object({
-    email: z.email(),
-    username: z.string().min(3).max(50),
     password : z.string().min(8),
     confirmPassword: z.string().min(8)
 })
@@ -58,15 +60,17 @@ const SignupFormField: React.FC<SignupFormFieldProps> = ({
     )
 }
 
-export function SignupForm({className, ...props}:React.ComponentProps<"div">){
-
+export function ResetPasswordForm({className, ...props}:React.ComponentProps<"div">){
+    const router = useRouter()
     const [isLoading, setIsLoading] = useState(false)
+
+    const searchParams = useSearchParams()
+    const token = searchParams.get("token")
+
     //Define form using react hook form
     const form = useForm<z.infer<typeof formSchema>>({
         resolver: zodResolver(formSchema),
         defaultValues : {
-            email: "",
-            username: "",
             password: "",
             confirmPassword: ""
         }
@@ -82,12 +86,15 @@ export function SignupForm({className, ...props}:React.ComponentProps<"div">){
                 return
             }
 
-            const response = await signUpUser(values.email, values.password, values.username )
-
-            if (response.success) {
-                toast.success("Please check your email for verification.")
+            const {error} = await authClient.resetPassword({
+                newPassword: values.password,
+                token: token ?? "",
+            })
+            if (!error) {
+                toast.success("Password reset successfully")
+                router.push("/login")
             }else{
-                toast.error(response.message)
+                toast.error(error.message)
             }
         }catch(error){
             console.error(error)
@@ -101,7 +108,7 @@ export function SignupForm({className, ...props}:React.ComponentProps<"div">){
         <div className={cn("flex flex-col gap-6", className)} {...props}>
             <Card>
                 <CardHeader>
-                    <CardTitle>Sign Up</CardTitle>
+                    <CardTitle>Reset Password</CardTitle>
                     <CardDescription>
                         Enter information to create an account
 
@@ -113,27 +120,11 @@ export function SignupForm({className, ...props}:React.ComponentProps<"div">){
                     <Form {...form} >
                         <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-8">
                             <div className= "flex flex-col gap-6">
-                            <div className="grid gap-3">
-                                <SignupFormField
-                                    name="email"
-                                    label="Email"
-                                    placeholder="Email"
-                                    inputType="email"
-                                    formControl={form.control}
-                                />
-                            </div>
-                            <div className="grid gap-3">
-                                <SignupFormField
-                                    name="username"
-                                    label="Username"
-                                    placeholder="Username"
-                                    formControl={form.control}
-                                />
-                            </div>
+          
                             <div className="grid gap-3">
                                 <SignupFormField
                                     name="password"
-                                    label="Password"
+                                    label="New Password"
                                     placeholder="Password"
                                     inputType="password"
                                     formControl={form.control}
@@ -151,11 +142,7 @@ export function SignupForm({className, ...props}:React.ComponentProps<"div">){
                             
                             <div className="flex flex-col gap-3">
                                 <Button type="submit" className="w-full" disabled={isLoading}>
-                                    {isLoading ? (<Loader2 className="size-4 animate-spin" />) : ("Sign Up")}
-                                </Button>
-                                <Button variant="outline" className="w-full" >
-                                    Sign Up with Google
-
+                                    {isLoading ? (<Loader2 className="size-4 animate-spin" />) : ("Submit")}
                                 </Button>
                             </div>
                         </div>

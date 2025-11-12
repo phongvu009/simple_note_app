@@ -15,13 +15,11 @@ import {z} from "zod"
 import {useForm} from "react-hook-form"
 import type {Control, FieldPath} from "react-hook-form"
 import {zodResolver} from "@hookform/resolvers/zod"
-import { signUpUser } from "@/server/users"
+import { authClient } from "@/lib/auth-client"
+
 //form schema
 const formSchema = z.object({
     email: z.email(),
-    username: z.string().min(3).max(50),
-    password : z.string().min(8),
-    confirmPassword: z.string().min(8)
 })
 
 interface SignupFormFieldProps{
@@ -58,7 +56,7 @@ const SignupFormField: React.FC<SignupFormFieldProps> = ({
     )
 }
 
-export function SignupForm({className, ...props}:React.ComponentProps<"div">){
+export function ForgotPasswordForm({className, ...props}:React.ComponentProps<"div">){
 
     const [isLoading, setIsLoading] = useState(false)
     //Define form using react hook form
@@ -66,9 +64,6 @@ export function SignupForm({className, ...props}:React.ComponentProps<"div">){
         resolver: zodResolver(formSchema),
         defaultValues : {
             email: "",
-            username: "",
-            password: "",
-            confirmPassword: ""
         }
     })
 
@@ -76,18 +71,16 @@ export function SignupForm({className, ...props}:React.ComponentProps<"div">){
     const onSubmit = async (values: z.infer<typeof formSchema>) =>{
         try{
             setIsLoading(true)
-            //confirm password
-            if (values.password !== values.confirmPassword){
-                toast.error("Password does not match")
-                return
-            }
 
-            const response = await signUpUser(values.email, values.password, values.username )
+            const {error } = await authClient.forgetPassword({
+                email: values.email,
+                redirectTo: "/reset-password"
+            })
 
-            if (response.success) {
-                toast.success("Please check your email for verification.")
+            if (!error) {
+                toast.success("Please check your email for a password reset link.")
             }else{
-                toast.error(response.message)
+                toast.error(error.message)
             }
         }catch(error){
             console.error(error)
@@ -101,10 +94,9 @@ export function SignupForm({className, ...props}:React.ComponentProps<"div">){
         <div className={cn("flex flex-col gap-6", className)} {...props}>
             <Card>
                 <CardHeader>
-                    <CardTitle>Sign Up</CardTitle>
+                    <CardTitle>Forgot password</CardTitle>
                     <CardDescription>
-                        Enter information to create an account
-
+                        Please Enter your email to reset your password
                     </CardDescription>
 
                 </CardHeader>
@@ -117,53 +109,22 @@ export function SignupForm({className, ...props}:React.ComponentProps<"div">){
                                 <SignupFormField
                                     name="email"
                                     label="Email"
-                                    placeholder="Email"
+                                    placeholder="m@example.com"
                                     inputType="email"
-                                    formControl={form.control}
-                                />
-                            </div>
-                            <div className="grid gap-3">
-                                <SignupFormField
-                                    name="username"
-                                    label="Username"
-                                    placeholder="Username"
-                                    formControl={form.control}
-                                />
-                            </div>
-                            <div className="grid gap-3">
-                                <SignupFormField
-                                    name="password"
-                                    label="Password"
-                                    placeholder="Password"
-                                    inputType="password"
-                                    formControl={form.control}
-                                />
-                            </div>
-                            <div className="grid gap-3">
-                                <SignupFormField
-                                    name="confirmPassword"
-                                    label="Confirm Password"
-                                    placeholder="Password"
-                                    inputType="password"
                                     formControl={form.control}
                                 />
                             </div>
                             
                             <div className="flex flex-col gap-3">
                                 <Button type="submit" className="w-full" disabled={isLoading}>
-                                    {isLoading ? (<Loader2 className="size-4 animate-spin" />) : ("Sign Up")}
-                                </Button>
-                                <Button variant="outline" className="w-full" >
-                                    Sign Up with Google
-
+                                    {isLoading ? (<Loader2 className="size-4 animate-spin" />) : ("Reset Password")}
                                 </Button>
                             </div>
                         </div>
 
                         <div className="mt-4 text-center text-sm">
-                            Already have an Account?{" "}
-                            <Link href="/login" className="underline underline-offset-4">Sign In</Link>
-
+                            Don&apos;t have an account?{" "}
+                            <Link href="/signup" className="underline underline-offset-4">Sign up</Link>
                         </div>
                         </form>
 
