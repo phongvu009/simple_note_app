@@ -61,8 +61,9 @@ export function LoginForm({
   })
 
   const signInGG = async()=>{
-    const data = await authClient.signIn.social({
-      provider: "google"
+    await authClient.signIn.social({
+      provider: "google",
+      callbackURL: "/dashboard"
     })
   }
 
@@ -142,13 +143,13 @@ export function LoginForm({
               </div>
 
               <div className="flex flex-col gap-3">
-                <Button type="submit" className="w-full" disabled={isLoading}>
+                <Button type="submit" className="w-full cursor-pointer" disabled={isLoading}>
                   {isLoading 
                     ? ( <Loader2 className="size-4 animate-spin"/>) 
                     : ("Login")
                   }
                 </Button>
-                <Button variant="outline" className="w-full" onClick={signInGG} type="button">
+                <Button variant="outline" className="w-full cursor-pointer" onClick={signInGG} type="button">
                   Login with Google
                 </Button>
               </div>

@@ -16,6 +16,7 @@ import {useForm} from "react-hook-form"
 import type {Control, FieldPath} from "react-hook-form"
 import {zodResolver} from "@hookform/resolvers/zod"
 import { signUpUser } from "@/server/users"
+import { authClient } from "@/lib/auth-client"
 //form schema
 const formSchema = z.object({
     email: z.email(),
@@ -97,6 +98,15 @@ export function SignupForm({className, ...props}:React.ComponentProps<"div">){
         }
     }
 
+    //Use Google to signup and login
+      const signUpGG = async()=>{
+        await authClient.signIn.social({
+          provider: "google",
+          callbackURL: "/dashboard"
+        })
+      }
+
+
     return (
         <div className={cn("flex flex-col gap-6", className)} {...props}>
             <Card>
@@ -150,10 +160,10 @@ export function SignupForm({className, ...props}:React.ComponentProps<"div">){
                             </div>
                             
                             <div className="flex flex-col gap-3">
-                                <Button type="submit" className="w-full" disabled={isLoading}>
+                                <Button type="submit" className="w-full cursor-pointer" disabled={isLoading}>
                                     {isLoading ? (<Loader2 className="size-4 animate-spin" />) : ("Sign Up")}
                                 </Button>
-                                <Button variant="outline" className="w-full" >
+                                <Button variant="outline" className="w-full cursor-pointer" onClick={signUpGG}>
                                     Sign Up with Google
 
                                 </Button>
