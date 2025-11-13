@@ -34,6 +34,7 @@ import {
 import { Input } from "@/components/ui/input"
 
 import Link from "next/link"
+import { authClient } from "@/lib/auth-client"
 
 //form schema
 const formSchema = z.object({
@@ -59,8 +60,10 @@ export function LoginForm({
     }
   })
 
-  const signIn = async()=>{
-    
+  const signInGG = async()=>{
+    const data = await authClient.signIn.social({
+      provider: "google"
+    })
   }
 
   //submit handler
@@ -145,7 +148,7 @@ export function LoginForm({
                     : ("Login")
                   }
                 </Button>
-                <Button variant="outline" className="w-full" onClick={signIn} type="button">
+                <Button variant="outline" className="w-full" onClick={signInGG} type="button">
                   Login with Google
                 </Button>
               </div>

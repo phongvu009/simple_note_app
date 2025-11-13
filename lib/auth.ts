@@ -19,14 +19,19 @@ export const auth = betterAuth({
         enabled: true,
         requireEmailVerification: true,
         sendResetPassword: async ({user, url, token}, request) => {
-      await resend.emails.send({
-        from:'onboarding@resend.dev',
-        to: [user.email],
-        subject: "Reset your password",
-        react: PasswordResetEmail({userName: user.name, resetUrl: url, requestTime: new Date().toLocaleString()})
-      });
+            await resend.emails.send({
+            from:'onboarding@resend.dev',
+            to: [user.email],
+            subject: "Reset your password",
+            react: PasswordResetEmail({userName: user.name, resetUrl: url, requestTime: new Date().toLocaleString()})
+        });
+        },
     },
-
+    socialProviders: {
+        google: { 
+            clientId: process.env.GOOGLE_CLIENT_ID as string, 
+            clientSecret: process.env.GOOGLE_CLIENT_SECRET as string, 
+        }, 
     },
     plugins: [nextCookies()],
     emailVerification: {
